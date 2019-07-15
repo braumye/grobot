@@ -14,11 +14,6 @@ type Robot struct {
     ParseResponseError   func(body io.Reader) error
 }
 
-type HttpResponse struct {
-    Errcode int    `json:"errcode"`
-    Errmsg  string `json:"errmsg`
-}
-
 func (this Robot) SendTextMessage(text string) error {
     body, err := this.ParseTextMessage(text)
 
