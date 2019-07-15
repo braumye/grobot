@@ -2,8 +2,8 @@ package grobot
 
 import (
     "bytes"
-    "encoding/json"
     "errors"
+    "io"
     "net/http"
 )
 
@@ -11,6 +11,12 @@ type Robot struct {
     Webhook              string
     ParseTextMessage     func(text string) ([]byte, error)
     ParseMarkdownMessage func(title string, text string) ([]byte, error)
+    ParseResponseError   func(body io.Reader) error
+}
+
+type HttpResponse struct {
+    Errcode int    `json:"errcode"`
+    Errmsg  string `json:"errmsg`
 }
 
 func (this Robot) SendTextMessage(text string) error {
@@ -20,7 +26,7 @@ func (this Robot) SendTextMessage(text string) error {
         return errors.New("ParseTextFailed: " + err.Error())
     }
 
-    return send(this.Webhook, body)
+    return this.send(body)
 }
 
 func (this Robot) SendMarkdownMessage(title string, text string) error {
@@ -30,11 +36,11 @@ func (this Robot) SendMarkdownMessage(title string, text string) error {
         return errors.New("ParseMarkdownFailed: " + err.Error())
     }
 
-    return send(this.Webhook, body)
+    return this.send(body)
 }
 
-func send(webhook string, body []byte) error {
-    req, reqerr := http.NewRequest("POST", webhook, bytes.NewBuffer(body))
+func (this Robot) send(body []byte) error {
+    req, reqerr := http.NewRequest("POST", this.Webhook, bytes.NewBuffer(body))
 
     if reqerr != nil {
         return errors.New("HttpRequestFailed: " + reqerr.Error())
@@ -53,16 +59,5 @@ func send(webhook string, body []byte) error {
         defer resp.Body.Close()
     }
 
-    jsonResp := make(map[string]string)
-    decodeErr := json.NewDecoder(resp.Body).Decode(&jsonResp)
-
-    if decodeErr != nil {
-        return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
-    }
-
-    if jsonResp["errmsg"] != "ok" {
-        return errors.New("SendMessageFailed: " + jsonResp["errmsg"])
-    }
-
-    return nil
+    return this.ParseResponseError(resp.Body)
 }
