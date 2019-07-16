@@ -45,11 +45,7 @@ type WebhookResponse struct {
 func (robot Robot) send(body map[string]interface{}) error {
 	message, _ := json.Marshal(body)
 
-	req, reqErr := http.NewRequest("POST", robot.Webhook, bytes.NewBuffer(message))
-
-	if reqErr != nil {
-		return errors.New("HttpRequestFailed: " + reqErr.Error())
-	}
+	req, _ := http.NewRequest("POST", robot.Webhook, bytes.NewBuffer(message))
 
 	req.Header.Set("Content-Type", "application/json")
 
