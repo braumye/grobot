@@ -2,8 +2,6 @@ package grobot
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
 )
 
 // DingTalkTextMessage 钉钉机器人文本消息体
@@ -24,7 +22,6 @@ func newDingTalkRobot(token string) *Robot {
 		Webhook:              "https://oapi.dingtalk.com/robot/send?access_token=" + token,
 		ParseTextMessage:     parseDingTalkTextMessage,
 		ParseMarkdownMessage: parseDingTalkMarkdownMessage,
-		ParseResponseError:   parseDingTalkResponse,
 	}
 }
 
@@ -83,26 +80,4 @@ func parseDingTalkMarkdownMessage(title string, text string) ([]byte, error) {
 	body["markdown"] = msg
 
 	return json.Marshal(body)
-}
-
-// DingTalkResponse 钉钉机器人 API 接口返回的消息体
-type DingTalkResponse struct {
-	ErrCode int    `json:"errcode"`
-	ErrMsg  string `json:"errmsg"`
-}
-
-// 判断钉钉机器人是否发送成功
-func parseDingTalkResponse(body io.Reader) error {
-	jsonResp := DingTalkResponse{}
-	decodeErr := json.NewDecoder(body).Decode(&jsonResp)
-
-	if decodeErr != nil {
-		return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
-	}
-
-	if jsonResp.ErrMsg != "ok" {
-		return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
-	}
-
-	return nil
 }

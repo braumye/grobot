@@ -2,8 +2,6 @@ package grobot
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -32,17 +30,6 @@ func TestRobot_SendMarkdownMessage(t *testing.T) {
 	robot := getTestRobot(ts.URL)
 	err := robot.SendMarkdownMessage("title", "text")
 	assert.Nil(t, err)
-}
-
-// 机器人处理 webhook 返回的结果
-func TestRobot_ParseResponseError(t *testing.T) {
-	want := `{"msgtype":"text","text":{"content":"test"}}`
-	ts := testHttp(t, want, `{"errmsg":"fail","errcode":400}`)
-	defer ts.Close()
-
-	robot := getTestRobot(ts.URL)
-	err := robot.SendTextMessage("test")
-	assert.Equal(t, "SendMessageFailed: fail", err.Error())
 }
 
 // 钉钉机器人发送文本消息
@@ -94,28 +81,7 @@ func getTestRobot(api string) *Robot {
 		Webhook:              api + "/send?token=token",
 		ParseTextMessage:     testTestBodyFunc,
 		ParseMarkdownMessage: testMarkdownParser,
-		ParseResponseError:   testParseResponseFunc,
 	}
-}
-
-type testHttpResponse struct {
-	ErrMsg  string `json:"errmsg"`
-	ErrCode int    `json:"errcode"`
-}
-
-func testParseResponseFunc(body io.Reader) error {
-	jsonResp := testHttpResponse{}
-	decodeErr := json.NewDecoder(body).Decode(&jsonResp)
-
-	if decodeErr != nil {
-		return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
-	}
-
-	if jsonResp.ErrMsg != "ok" {
-		return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
-	}
-
-	return nil
 }
 
 type testTextMessage struct {

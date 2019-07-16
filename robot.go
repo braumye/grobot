@@ -2,8 +2,8 @@ package grobot
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 )
 
@@ -19,9 +19,6 @@ type Robot struct {
 
 	// 将标题和文本转化成机器人发送 Markdown 消息需要的接口参数
 	ParseMarkdownMessage func(title string, text string) ([]byte, error)
-
-	// 处理 Webhook 返回结果, 用来判断是否发送成功, 发送失败会返回 nil
-	ParseResponseError func(body io.Reader) error
 }
 
 // SendTextMessage 发送一条文本消息
@@ -46,27 +43,43 @@ func (robot Robot) SendMarkdownMessage(title string, text string) error {
 	return robot.send(body)
 }
 
+// WebhookResponse 调用 webhook 之后返回的消息体
+type WebhookResponse struct {
+	ErrCode int    `json:"errcode"`
+	ErrMsg  string `json:"errmsg"`
+}
+
 // 发送消息到 Webhook
 func (robot Robot) send(body []byte) error {
-	req, reqerr := http.NewRequest("POST", robot.Webhook, bytes.NewBuffer(body))
+	req, reqErr := http.NewRequest("POST", robot.Webhook, bytes.NewBuffer(body))
 
-	if reqerr != nil {
-		return errors.New("HttpRequestFailed: " + reqerr.Error())
+	if reqErr != nil {
+		return errors.New("HttpRequestFailed: " + reqErr.Error())
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, resperr := client.Do(req)
+	resp, respErr := client.Do(req)
 
-	if resperr != nil {
-		return errors.New("HttpResponseFailed: " + resperr.Error())
+	if respErr != nil {
+		return errors.New("HttpResponseFailed: " + respErr.Error())
 	}
 
 	if resp != nil {
 		defer resp.Body.Close()
 	}
 
-	// 判断是否发送成功
-	return robot.ParseResponseError(resp.Body)
+	jsonResp := WebhookResponse{}
+	decodeErr := json.NewDecoder(resp.Body).Decode(&jsonResp)
+
+	if decodeErr != nil {
+		return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
+	}
+
+	if jsonResp.ErrMsg != "ok" {
+		return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
+	}
+
+	return nil
 }

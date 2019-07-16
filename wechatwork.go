@@ -2,8 +2,6 @@ package grobot
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
 )
 
 // WechatWorkTextMessage 企业微信机器人文本消息体
@@ -24,7 +22,6 @@ func newWechatWorkRobot(token string) *Robot {
 		Webhook:              "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + token,
 		ParseTextMessage:     parseDingTalkTextMessage,
 		ParseMarkdownMessage: parseWechatWorkMarkdownMessage,
-		ParseResponseError:   parseWechatWorkResponse,
 	}
 }
 
@@ -70,26 +67,4 @@ func parseWechatWorkMarkdownMessage(title string, text string) ([]byte, error) {
 	body["markdown"] = msg
 
 	return json.Marshal(body)
-}
-
-// WechatWorkResponse 企业微信在调用 webhook 之后返回的消息体
-type WechatWorkResponse struct {
-	ErrCode int    `json:"errcode"`
-	ErrMsg  string `json:"errmsg"`
-}
-
-// 判断企业微信 webhook 返回的结果是否为发送成功
-func parseWechatWorkResponse(body io.Reader) error {
-	jsonResp := WechatWorkResponse{}
-	decodeErr := json.NewDecoder(body).Decode(&jsonResp)
-
-	if decodeErr != nil {
-		return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
-	}
-
-	if jsonResp.ErrMsg != "ok" {
-		return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
-	}
-
-	return nil
 }
