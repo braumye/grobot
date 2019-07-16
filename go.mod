@@ -1,4 +1,4 @@
-module grobot
+module github.com/braumye/grobot
 
 go 1.12
 
