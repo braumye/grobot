@@ -1,31 +1,31 @@
 package grobot
 
 import (
-    "encoding/json"
-    "errors"
-    "io"
+	"encoding/json"
+	"errors"
+	"io"
 )
 
 // WechatWorkTextMessage 企业微信机器人文本消息体
 type WechatWorkTextMessage struct {
-    Content string `json:"content"`
+	Content string `json:"content"`
 }
 
 // WechatWorkMarkdownMessage 企业微信机器人 Markdown 消息体
 type WechatWorkMarkdownMessage struct {
-    Title string `json:"title"`
-    Text  string `json:"text"`
+	Title string `json:"title"`
+	Text  string `json:"text"`
 }
 
 // newWechatWorkRobot 初始化企业微信机器人
 // @see https://work.weixin.qq.com/api/doc#90000/90136/91770
 func newWechatWorkRobot(token string) *Robot {
-    return &Robot{
-        Webhook:              "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + token,
-        ParseTextMessage:     parseDingTalkTextMessage,
-        ParseMarkdownMessage: parseWechatWorkMarkdownMessage,
-        ParseResponseError:   parseWechatWorkResponse,
-    }
+	return &Robot{
+		Webhook:              "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + token,
+		ParseTextMessage:     parseDingTalkTextMessage,
+		ParseMarkdownMessage: parseWechatWorkMarkdownMessage,
+		ParseResponseError:   parseWechatWorkResponse,
+	}
 }
 
 // 请求参数示例
@@ -38,15 +38,15 @@ func newWechatWorkRobot(token string) *Robot {
 //     }
 // }
 func parseWechatWorkTextMessage(text string) ([]byte, error) {
-    msg := WechatWorkTextMessage{
-        Content: text,
-    }
+	msg := WechatWorkTextMessage{
+		Content: text,
+	}
 
-    body := make(map[string]interface{})
-    body["msgtype"] = "text"
-    body["text"] = msg
+	body := make(map[string]interface{})
+	body["msgtype"] = "text"
+	body["text"] = msg
 
-    return json.Marshal(body)
+	return json.Marshal(body)
 }
 
 // 请求参数示例
@@ -60,36 +60,36 @@ func parseWechatWorkTextMessage(text string) ([]byte, error) {
 //     }
 // }
 func parseWechatWorkMarkdownMessage(title string, text string) ([]byte, error) {
-    msg := WechatWorkMarkdownMessage{
-        Title: title,
-        Text:  text,
-    }
+	msg := WechatWorkMarkdownMessage{
+		Title: title,
+		Text:  text,
+	}
 
-    body := make(map[string]interface{})
-    body["msgtype"] = "markdown"
-    body["markdown"] = msg
+	body := make(map[string]interface{})
+	body["msgtype"] = "markdown"
+	body["markdown"] = msg
 
-    return json.Marshal(body)
+	return json.Marshal(body)
 }
 
 // WechatWorkResponse 企业微信在调用 webhook 之后返回的消息体
 type WechatWorkResponse struct {
-    ErrCode int    `json:"errcode"`
-    ErrMsg  string `json:"errmsg"`
+	ErrCode int    `json:"errcode"`
+	ErrMsg  string `json:"errmsg"`
 }
 
 // 判断企业微信 webhook 返回的结果是否为发送成功
 func parseWechatWorkResponse(body io.Reader) error {
-    jsonResp := WechatWorkResponse{}
-    decodeErr := json.NewDecoder(body).Decode(&jsonResp)
+	jsonResp := WechatWorkResponse{}
+	decodeErr := json.NewDecoder(body).Decode(&jsonResp)
 
-    if decodeErr != nil {
-        return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
-    }
+	if decodeErr != nil {
+		return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
+	}
 
-    if jsonResp.ErrMsg != "ok" {
-        return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
-    }
+	if jsonResp.ErrMsg != "ok" {
+		return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
+	}
 
-    return nil
+	return nil
 }

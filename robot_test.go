@@ -1,150 +1,150 @@
 package grobot
 
 import (
-    "encoding/json"
-    "errors"
-    "io"
-    "io/ioutil"
-    "net/http"
-    "net/http/httptest"
-    "testing"
+	"encoding/json"
+	"errors"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
-    "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 // 机器人发送文本消息
 func TestRobot_SendTextMessage(t *testing.T) {
-    want := `{"msgtype":"text","text":{"content":"test"}}`
-    ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`)
-    defer ts.Close()
+	want := `{"msgtype":"text","text":{"content":"test"}}`
+	ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`)
+	defer ts.Close()
 
-    robot := getTestRobot(ts.URL)
-    err := robot.SendTextMessage("test")
-    assert.Nil(t, err)
+	robot := getTestRobot(ts.URL)
+	err := robot.SendTextMessage("test")
+	assert.Nil(t, err)
 }
 
 // 机器人发送 Markdown 消息
 func TestRobot_SendMarkdownMessage(t *testing.T) {
-    want := `{"markdown":{"title":"title","text":"text"},"msgtype":"markdown"}`
-    ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`)
-    defer ts.Close()
+	want := `{"markdown":{"title":"title","text":"text"},"msgtype":"markdown"}`
+	ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`)
+	defer ts.Close()
 
-    robot := getTestRobot(ts.URL)
-    err := robot.SendMarkdownMessage("title", "text")
-    assert.Nil(t, err)
+	robot := getTestRobot(ts.URL)
+	err := robot.SendMarkdownMessage("title", "text")
+	assert.Nil(t, err)
 }
 
 // 机器人处理 webhook 返回的结果
 func TestRobot_ParseResponseError(t *testing.T) {
-    want := `{"msgtype":"text","text":{"content":"test"}}`
-    ts := testHttp(t, want, `{"errmsg":"fail","errcode":400}`)
-    defer ts.Close()
+	want := `{"msgtype":"text","text":{"content":"test"}}`
+	ts := testHttp(t, want, `{"errmsg":"fail","errcode":400}`)
+	defer ts.Close()
 
-    robot := getTestRobot(ts.URL)
-    err := robot.SendTextMessage("test")
-    assert.Equal(t, "SendMessageFailed: fail", err.Error())
+	robot := getTestRobot(ts.URL)
+	err := robot.SendTextMessage("test")
+	assert.Equal(t, "SendMessageFailed: fail", err.Error())
 }
 
 // 钉钉机器人发送文本消息
 func TestDingTalkRobot_SendTextMessage(t *testing.T) {
-    robot, _ := New("dingtalk", "token")
-    err := robot.SendTextMessage("test")
-    assert.Contains(t, "SendMessageFailed: token is not exist", err.Error())
+	robot, _ := New("dingtalk", "token")
+	err := robot.SendTextMessage("test")
+	assert.Contains(t, "SendMessageFailed: token is not exist", err.Error())
 }
 
 // 钉钉机器人发送 Markdown 消息
 func TestDingTalkRobot_SendMarkdownMessage(t *testing.T) {
-    robot, _ := New("dingtalk", "token")
-    err := robot.SendMarkdownMessage("title", "text")
-    assert.Contains(t, "SendMessageFailed: token is not exist", err.Error())
+	robot, _ := New("dingtalk", "token")
+	err := robot.SendMarkdownMessage("title", "text")
+	assert.Contains(t, "SendMessageFailed: token is not exist", err.Error())
 }
 
 // 企业微信机器人发送文本消息
 func TestWechatWorkRobot_SendTextMessage(t *testing.T) {
-    robot, _ := New("wechatwork", "token")
-    err := robot.SendTextMessage("test")
-    assert.Contains(t, err.Error(), "SendMessageFailed: invalid webhook url")
+	robot, _ := New("wechatwork", "token")
+	err := robot.SendTextMessage("test")
+	assert.Contains(t, err.Error(), "SendMessageFailed: invalid webhook url")
 }
 
 // 企业微信机器人发送 Markdown 消息
 func TestWechatWorkRobot_SendMarkdownMessage(t *testing.T) {
-    robot, _ := New("wechatwork", "token")
-    err := robot.SendMarkdownMessage("title", "text")
-    assert.Contains(t, err.Error(), "SendMessageFailed: invalid webhook url")
+	robot, _ := New("wechatwork", "token")
+	err := robot.SendMarkdownMessage("title", "text")
+	assert.Contains(t, err.Error(), "SendMessageFailed: invalid webhook url")
 }
 
 // mock http client
 func testHttp(t *testing.T, want string, resp string) *httptest.Server {
-    return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte(resp))
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(resp))
 
-        assert.Equal(t, "POST", r.Method)
-        b, _ := ioutil.ReadAll(r.Body)
+		assert.Equal(t, "POST", r.Method)
+		b, _ := ioutil.ReadAll(r.Body)
 
-        assert.Equal(t, want, string(b))
+		assert.Equal(t, want, string(b))
 
-        r.ParseForm()
-        assert.Equal(t, "token", r.Form.Get("token"))
-    }))
+		r.ParseForm()
+		assert.Equal(t, "token", r.Form.Get("token"))
+	}))
 }
 
 func getTestRobot(api string) *Robot {
-    return &Robot{
-        Webhook:              api + "/send?token=token",
-        ParseTextMessage:     testTestBodyFunc,
-        ParseMarkdownMessage: testMarkdownParser,
-        ParseResponseError:   testParseResponseFunc,
-    }
+	return &Robot{
+		Webhook:              api + "/send?token=token",
+		ParseTextMessage:     testTestBodyFunc,
+		ParseMarkdownMessage: testMarkdownParser,
+		ParseResponseError:   testParseResponseFunc,
+	}
 }
 
 type testHttpResponse struct {
-    ErrMsg  string `json:"errmsg"`
-    ErrCode int    `json:"errcode"`
+	ErrMsg  string `json:"errmsg"`
+	ErrCode int    `json:"errcode"`
 }
 
 func testParseResponseFunc(body io.Reader) error {
-    jsonResp := testHttpResponse{}
-    decodeErr := json.NewDecoder(body).Decode(&jsonResp)
+	jsonResp := testHttpResponse{}
+	decodeErr := json.NewDecoder(body).Decode(&jsonResp)
 
-    if decodeErr != nil {
-        return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
-    }
+	if decodeErr != nil {
+		return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
+	}
 
-    if jsonResp.ErrMsg != "ok" {
-        return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
-    }
+	if jsonResp.ErrMsg != "ok" {
+		return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
+	}
 
-    return nil
+	return nil
 }
 
 type testTextMessage struct {
-    Content string `json:"content"`
+	Content string `json:"content"`
 }
 
 func testTestBodyFunc(text string) ([]byte, error) {
-    msg := testTextMessage{text}
-    body := make(map[string]interface{})
-    body["msgtype"] = "text"
-    body["text"] = msg
+	msg := testTextMessage{text}
+	body := make(map[string]interface{})
+	body["msgtype"] = "text"
+	body["text"] = msg
 
-    return json.Marshal(body)
+	return json.Marshal(body)
 }
 
 type testMarkdownMessage struct {
-    Title string `json:"title"`
-    Text  string `json:"text"`
+	Title string `json:"title"`
+	Text  string `json:"text"`
 }
 
 func testMarkdownParser(title string, text string) ([]byte, error) {
-    msg := testMarkdownMessage{
-        Title: title,
-        Text:  text,
-    }
+	msg := testMarkdownMessage{
+		Title: title,
+		Text:  text,
+	}
 
-    body := make(map[string]interface{})
-    body["msgtype"] = "markdown"
-    body["markdown"] = msg
+	body := make(map[string]interface{})
+	body["msgtype"] = "markdown"
+	body["markdown"] = msg
 
-    return json.Marshal(body)
+	return json.Marshal(body)
 }
