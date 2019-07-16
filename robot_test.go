@@ -12,7 +12,7 @@ import (
 // 机器人发送文本消息
 func TestRobot_SendTextMessage(t *testing.T) {
 	want := `{"msgtype":"text","text":{"content":"test"}}`
-	ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`)
+	ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`, http.StatusOK)
 	defer ts.Close()
 
 	robot := getTestRobot(ts.URL)
@@ -23,12 +23,32 @@ func TestRobot_SendTextMessage(t *testing.T) {
 // 机器人发送 Markdown 消息
 func TestRobot_SendMarkdownMessage(t *testing.T) {
 	want := `{"markdown":{"title":"title","text":"text"},"msgtype":"markdown"}`
-	ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`)
+	ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`, http.StatusOK)
 	defer ts.Close()
 
 	robot := getTestRobot(ts.URL)
 	err := robot.SendMarkdownMessage("title", "text")
 	assert.Nil(t, err)
+}
+
+func TestRobotSendMessageFailed_WebhookReturnEmpty(t *testing.T) {
+	want := `{"markdown":{"title":"title","text":"text"},"msgtype":"markdown"}`
+	ts := testHttp(t, want, "", http.StatusOK)
+	defer ts.Close()
+
+	robot := getTestRobot(ts.URL)
+	err := robot.SendMarkdownMessage("title", "text")
+	assert.Equal(t, "HttpResponseBodyDecodeFailed: EOF", err.Error())
+}
+
+func TestRobotSendMessageFailed_ResponseUnsuccessfully(t *testing.T) {
+	want := `{"markdown":{"title":"title","text":"text"},"msgtype":"markdown"}`
+	ts := testHttp(t, want, "", http.StatusBadRequest)
+	defer ts.Close()
+
+	robot := getTestRobot(ts.URL)
+	err := robot.SendMarkdownMessage("title", "text")
+	assert.Equal(t, "HttpResponseStatusCode: 400", err.Error())
 }
 
 // 钉钉机器人发送文本消息
@@ -60,9 +80,9 @@ func TestWechatWorkRobot_SendMarkdownMessage(t *testing.T) {
 }
 
 // mock http client
-func testHttp(t *testing.T, want string, resp string) *httptest.Server {
+func testHttp(t *testing.T, want string, resp string, statusCode int) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(statusCode)
 		w.Write([]byte(resp))
 
 		assert.Equal(t, "POST", r.Method)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 )
 
 // Robot 消息机器人结构体, 消息处理都由 Robot 完成
@@ -58,6 +59,10 @@ func (robot Robot) send(body map[string]interface{}) error {
 
 	if resp != nil {
 		defer resp.Body.Close()
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("HttpResponseStatusCode: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	jsonResp := WebhookResponse{}
