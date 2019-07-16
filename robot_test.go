@@ -1,7 +1,6 @@
 package grobot
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -88,13 +87,13 @@ type testTextMessage struct {
 	Content string `json:"content"`
 }
 
-func testTestBodyFunc(text string) ([]byte, error) {
+func testTestBodyFunc(text string) map[string]interface{} {
 	msg := testTextMessage{text}
 	body := make(map[string]interface{})
 	body["msgtype"] = "text"
 	body["text"] = msg
 
-	return json.Marshal(body)
+	return body
 }
 
 type testMarkdownMessage struct {
@@ -102,7 +101,7 @@ type testMarkdownMessage struct {
 	Text  string `json:"text"`
 }
 
-func testMarkdownParser(title string, text string) ([]byte, error) {
+func testMarkdownParser(title string, text string) map[string]interface{} {
 	msg := testMarkdownMessage{
 		Title: title,
 		Text:  text,
@@ -112,5 +111,5 @@ func testMarkdownParser(title string, text string) ([]byte, error) {
 	body["msgtype"] = "markdown"
 	body["markdown"] = msg
 
-	return json.Marshal(body)
+	return body
 }

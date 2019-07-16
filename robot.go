@@ -15,30 +15,22 @@ type Robot struct {
 	Webhook string
 
 	// 将一段文本转化成机器人发送文本消息需要的接口参数
-	ParseTextMessage func(text string) ([]byte, error)
+	ParseTextMessage func(text string) map[string]interface{}
 
 	// 将标题和文本转化成机器人发送 Markdown 消息需要的接口参数
-	ParseMarkdownMessage func(title string, text string) ([]byte, error)
+	ParseMarkdownMessage func(title string, text string) map[string]interface{}
 }
 
 // SendTextMessage 发送一条文本消息
 func (robot Robot) SendTextMessage(text string) error {
-	body, err := robot.ParseTextMessage(text)
+	message := robot.ParseTextMessage(text)
 
-	if err != nil {
-		return errors.New("ParseTextFailed: " + err.Error())
-	}
-
-	return robot.send(body)
+	return robot.send(message)
 }
 
 // SendMarkdownMessage 发送一条 Markdown 消息
 func (robot Robot) SendMarkdownMessage(title string, text string) error {
-	body, err := robot.ParseMarkdownMessage(title, text)
-
-	if err != nil {
-		return errors.New("ParseMarkdownFailed: " + err.Error())
-	}
+	body := robot.ParseMarkdownMessage(title, text)
 
 	return robot.send(body)
 }
@@ -50,8 +42,10 @@ type WebhookResponse struct {
 }
 
 // 发送消息到 Webhook
-func (robot Robot) send(body []byte) error {
-	req, reqErr := http.NewRequest("POST", robot.Webhook, bytes.NewBuffer(body))
+func (robot Robot) send(body map[string]interface{}) error {
+	message, _ := json.Marshal(body)
+
+	req, reqErr := http.NewRequest("POST", robot.Webhook, bytes.NewBuffer(message))
 
 	if reqErr != nil {
 		return errors.New("HttpRequestFailed: " + reqErr.Error())

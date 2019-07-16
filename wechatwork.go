@@ -1,9 +1,5 @@
 package grobot
 
-import (
-	"encoding/json"
-)
-
 // WechatWorkTextMessage 企业微信机器人文本消息体
 type WechatWorkTextMessage struct {
 	Content string `json:"content"`
@@ -34,7 +30,7 @@ func newWechatWorkRobot(token string) *Robot {
 //         "mentioned_mobile_list":["13800001111","@all"]
 //     }
 // }
-func parseWechatWorkTextMessage(text string) ([]byte, error) {
+func parseWechatWorkTextMessage(text string) map[string]interface{} {
 	msg := WechatWorkTextMessage{
 		Content: text,
 	}
@@ -43,7 +39,7 @@ func parseWechatWorkTextMessage(text string) ([]byte, error) {
 	body["msgtype"] = "text"
 	body["text"] = msg
 
-	return json.Marshal(body)
+	return body
 }
 
 // 请求参数示例
@@ -56,7 +52,7 @@ func parseWechatWorkTextMessage(text string) ([]byte, error) {
 //          >VIP用户反馈:<font color=\"comment\">15例</font>"
 //     }
 // }
-func parseWechatWorkMarkdownMessage(title string, text string) ([]byte, error) {
+func parseWechatWorkMarkdownMessage(title string, text string) map[string]interface{} {
 	msg := WechatWorkMarkdownMessage{
 		Title: title,
 		Text:  text,
@@ -66,5 +62,5 @@ func parseWechatWorkMarkdownMessage(title string, text string) ([]byte, error) {
 	body["msgtype"] = "markdown"
 	body["markdown"] = msg
 
-	return json.Marshal(body)
+	return body
 }

@@ -1,9 +1,5 @@
 package grobot
 
-import (
-	"encoding/json"
-)
-
 // DingTalkTextMessage 钉钉机器人文本消息体
 type DingTalkTextMessage struct {
 	Content string `json:"content"`
@@ -39,7 +35,7 @@ func newDingTalkRobot(token string) *Robot {
 //         "isAtAll": false
 //     }
 // }
-func parseDingTalkTextMessage(text string) ([]byte, error) {
+func parseDingTalkTextMessage(text string) map[string]interface{} {
 	msg := DingTalkTextMessage{
 		Content: text,
 	}
@@ -48,7 +44,7 @@ func parseDingTalkTextMessage(text string) ([]byte, error) {
 	body["msgtype"] = "text"
 	body["text"] = msg
 
-	return json.Marshal(body)
+	return body
 }
 
 // 钉钉机器人发送 Markdown 消息的接口参数示例
@@ -69,7 +65,7 @@ func parseDingTalkTextMessage(text string) ([]byte, error) {
 //         "isAtAll": false
 //     }
 //  }
-func parseDingTalkMarkdownMessage(title string, text string) ([]byte, error) {
+func parseDingTalkMarkdownMessage(title string, text string) map[string]interface{} {
 	msg := DingTalkMarkdownMessage{
 		Title: title,
 		Text:  text,
@@ -79,5 +75,5 @@ func parseDingTalkMarkdownMessage(title string, text string) ([]byte, error) {
 	body["msgtype"] = "markdown"
 	body["markdown"] = msg
 
-	return json.Marshal(body)
+	return body
 }
