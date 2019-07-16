@@ -12,6 +12,7 @@ import (
     "github.com/stretchr/testify/assert"
 )
 
+// 机器人发送文本消息
 func TestRobot_SendTextMessage(t *testing.T) {
     want := `{"msgtype":"text","text":{"content":"test"}}`
     ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`)
@@ -22,6 +23,7 @@ func TestRobot_SendTextMessage(t *testing.T) {
     assert.Nil(t, err)
 }
 
+// 机器人发送 Markdown 消息
 func TestRobot_SendMarkdownMessage(t *testing.T) {
     want := `{"markdown":{"title":"title","text":"text"},"msgtype":"markdown"}`
     ts := testHttp(t, want, `{"errmsg":"ok","errcode":0}`)
@@ -32,6 +34,7 @@ func TestRobot_SendMarkdownMessage(t *testing.T) {
     assert.Nil(t, err)
 }
 
+// 机器人处理 webhook 返回的结果
 func TestRobot_ParseResponseError(t *testing.T) {
     want := `{"msgtype":"text","text":{"content":"test"}}`
     ts := testHttp(t, want, `{"errmsg":"fail","errcode":400}`)
@@ -42,30 +45,35 @@ func TestRobot_ParseResponseError(t *testing.T) {
     assert.Equal(t, "SendMessageFailed: fail", err.Error())
 }
 
+// 钉钉机器人发送文本消息
 func TestDingTalkRobot_SendTextMessage(t *testing.T) {
     robot, _ := New("dingtalk", "token")
     err := robot.SendTextMessage("test")
     assert.Contains(t, "SendMessageFailed: token is not exist", err.Error())
 }
 
+// 钉钉机器人发送 Markdown 消息
 func TestDingTalkRobot_SendMarkdownMessage(t *testing.T) {
     robot, _ := New("dingtalk", "token")
     err := robot.SendMarkdownMessage("title", "text")
     assert.Contains(t, "SendMessageFailed: token is not exist", err.Error())
 }
 
+// 企业微信机器人发送文本消息
 func TestWechatWorkRobot_SendTextMessage(t *testing.T) {
     robot, _ := New("wechatwork", "token")
     err := robot.SendTextMessage("test")
     assert.Contains(t, err.Error(), "SendMessageFailed: invalid webhook url")
 }
 
+// 企业微信机器人发送 Markdown 消息
 func TestWechatWorkRobot_SendMarkdownMessage(t *testing.T) {
     robot, _ := New("wechatwork", "token")
     err := robot.SendMarkdownMessage("title", "text")
     assert.Contains(t, err.Error(), "SendMessageFailed: invalid webhook url")
 }
 
+// mock http client
 func testHttp(t *testing.T, want string, resp string) *httptest.Server {
     return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusOK)
