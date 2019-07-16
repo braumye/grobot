@@ -7,7 +7,7 @@ import (
     "net/http"
 )
 
-// 消息机器人结构体, 消息处理都由 Robot 完成
+// Robot 消息机器人结构体, 消息处理都由 Robot 完成
 type Robot struct {
     // Robot Webhook
     // dingtalk: https://oapi.dingtalk.com/robot/send?access_token=b0292a2506
@@ -24,7 +24,7 @@ type Robot struct {
     ParseResponseError func(body io.Reader) error
 }
 
-// 发送一条文本消息
+// SendTextMessage 发送一条文本消息
 func (robot Robot) SendTextMessage(text string) error {
     body, err := robot.ParseTextMessage(text)
 
@@ -35,7 +35,7 @@ func (robot Robot) SendTextMessage(text string) error {
     return robot.send(body)
 }
 
-// 发送一条 Markdown 消息
+// SendMarkdownMessage 发送一条 Markdown 消息
 func (robot Robot) SendMarkdownMessage(title string, text string) error {
     body, err := robot.ParseMarkdownMessage(title, text)
 

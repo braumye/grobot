@@ -6,18 +6,18 @@ import (
     "io"
 )
 
-// 企业微信机器人文本消息体
+// WechatWorkTextMessage 企业微信机器人文本消息体
 type WechatWorkTextMessage struct {
     Content string `json:"content"`
 }
 
-// 企业微信机器人 Markdown 消息体
+// WechatWorkMarkdownMessage 企业微信机器人 Markdown 消息体
 type WechatWorkMarkdownMessage struct {
     Title string `json:"title"`
     Text  string `json:"text"`
 }
 
-// 初始化企业微信机器人
+// newWechatWorkRobot 初始化企业微信机器人
 // @see https://work.weixin.qq.com/api/doc#90000/90136/91770
 func newWechatWorkRobot(token string) *Robot {
     return &Robot{
@@ -72,7 +72,7 @@ func parseWechatWorkMarkdownMessage(title string, text string) ([]byte, error) {
     return json.Marshal(body)
 }
 
-// 企业微信在调用 webhook 之后返回的消息体
+// WechatWorkResponse 企业微信在调用 webhook 之后返回的消息体
 type WechatWorkResponse struct {
     ErrCode int    `json:"errcode"`
     ErrMsg  string `json:"errmsg"`

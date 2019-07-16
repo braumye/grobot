@@ -6,12 +6,12 @@ import (
     "io"
 )
 
-// 钉钉机器人 TextMessage 消息体
+// DingTalkTextMessage 钉钉机器人文本消息体
 type DingTalkTextMessage struct {
     Content string `json:"content"`
 }
 
-// 钉钉机器人 MarkdownMessage 消息体
+// DingTalkMarkdownMessage 钉钉机器人 Markdown 消息体
 type DingTalkMarkdownMessage struct {
     Title string `json:"title"`
     Text  string `json:"text"`
@@ -85,7 +85,7 @@ func parseDingTalkMarkdownMessage(title string, text string) ([]byte, error) {
     return json.Marshal(body)
 }
 
-// 钉钉机器人 API 接口返回的消息体
+// DingTalkResponse 钉钉机器人 API 接口返回的消息体
 type DingTalkResponse struct {
     ErrCode int    `json:"errcode"`
     ErrMsg  string `json:"errmsg"`
