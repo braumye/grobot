@@ -22,16 +22,12 @@ type Robot struct {
 
 // SendTextMessage 发送一条文本消息
 func (robot Robot) SendTextMessage(text string) error {
-	message := robot.ParseTextMessage(text)
-
-	return robot.send(message)
+	return robot.send(robot.ParseTextMessage(text))
 }
 
 // SendMarkdownMessage 发送一条 Markdown 消息
 func (robot Robot) SendMarkdownMessage(title string, text string) error {
-	body := robot.ParseMarkdownMessage(title, text)
-
-	return robot.send(body)
+	return robot.send(robot.ParseMarkdownMessage(title, text))
 }
 
 // WebhookResponse 调用 webhook 之后返回的消息体
