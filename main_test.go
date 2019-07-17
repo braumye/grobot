@@ -35,14 +35,14 @@ func TestNew_UnsupportedDriver(t *testing.T) {
 func TestDingTalkRobot_SendTextMessage(t *testing.T) {
 	robot, _ := grobot.New("dingtalk", "token")
 	err := robot.SendTextMessage("test")
-	assert.Contains(t, "SendMessageFailed:token is not exist", err.Error())
+	assert.Equal(t, `SendMessageFailed:token is not exist,RawBody:{"errcode":300001,"errmsg":"token is not exist"}`, err.Error())
 }
 
 // 钉钉机器人发送 Markdown 消息
 func TestDingTalkRobot_SendMarkdownMessage(t *testing.T) {
 	robot, _ := grobot.New("dingtalk", "token")
 	err := robot.SendMarkdownMessage("title", "text")
-	assert.Contains(t, "SendMessageFailed:token is not exist", err.Error())
+	assert.Equal(t, `SendMessageFailed:token is not exist,RawBody:{"errcode":300001,"errmsg":"token is not exist"}`, err.Error())
 }
 
 // 企业微信机器人发送文本消息

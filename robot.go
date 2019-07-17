@@ -3,6 +3,7 @@ package grobot
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -51,23 +52,28 @@ func (robot Robot) send(body map[string]interface{}) error {
 		return newError("HttpResponseFailed", respErr)
 	}
 
+	bodyBytes := []byte("")
 	if resp != nil {
 		defer resp.Body.Close()
+
+		bodyBytes, _ = ioutil.ReadAll(resp.Body)
 	}
 
+	rawBody := string(bodyBytes)
+
 	if resp.StatusCode != http.StatusOK {
-		return newError("HttpResponseStatusCode", resp.StatusCode)
+		return newError("HttpResponseStatusCode", resp.StatusCode, ",RawBody:", rawBody)
 	}
 
 	jsonResp := WebhookResponse{}
-	decodeErr := json.NewDecoder(resp.Body).Decode(&jsonResp)
+	decodeErr := json.Unmarshal(bodyBytes, &jsonResp)
 
 	if decodeErr != nil {
-		return newError("HttpResponseBodyDecodeFailed", decodeErr)
+		return newError("HttpResponseBodyDecodeFailed", decodeErr, ",RawBody:", rawBody)
 	}
 
 	if jsonResp.ErrMsg != "ok" {
-		return newError("SendMessageFailed", jsonResp.ErrMsg)
+		return newError("SendMessageFailed", jsonResp.ErrMsg, ",RawBody:", rawBody)
 	}
 
 	return nil

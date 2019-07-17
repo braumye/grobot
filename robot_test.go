@@ -38,17 +38,17 @@ func TestRobotSendMessageFailed_WebhookReturnEmpty(t *testing.T) {
 
 	robot := getTestRobot(ts.URL)
 	err := robot.SendMarkdownMessage("title", "text")
-	assert.Equal(t, "HttpResponseBodyDecodeFailed:EOF", err.Error())
+	assert.Equal(t, "HttpResponseBodyDecodeFailed:unexpected end of JSON input,RawBody:", err.Error())
 }
 
 func TestRobotSendMessageFailed_ResponseUnsuccessfully(t *testing.T) {
 	want := `{"markdown":{"title":"title","text":"text"},"msgtype":"markdown"}`
-	ts := testHttp(t, want, "", http.StatusBadRequest)
+	ts := testHttp(t, want, `{"errcode":400,"errmsg":"bas request"}`, http.StatusBadRequest)
 	defer ts.Close()
 
 	robot := getTestRobot(ts.URL)
 	err := robot.SendMarkdownMessage("title", "text")
-	assert.Equal(t, "HttpResponseStatusCode:400", err.Error())
+	assert.Equal(t, `HttpResponseStatusCode:400,RawBody:{"errcode":400,"errmsg":"bas request"}`, err.Error())
 }
 
 // mock http client

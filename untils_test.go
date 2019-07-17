@@ -24,5 +24,5 @@ func TestUtils_NewError_Error(t *testing.T) {
 }
 
 func TestUtils_NewError_Default(t *testing.T) {
-	assert.Equal(t, "type", newError("type", t).Error())
+	assert.Equal(t, "type:", newError("type", t).Error())
 }

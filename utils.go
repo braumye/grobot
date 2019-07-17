@@ -16,19 +16,19 @@ func stringBuilder(strs ...string) string {
 	return stringBuilder.String()
 }
 
-func newError(errType string, result interface{}) error {
-	var rs string
+func newError(errType string, items ...interface{}) error {
+	errType = stringBuilder(errType, ":")
 
-	switch result.(type) {
-	case string:
-		rs = stringBuilder(errType, ":", result.(string))
-	case int:
-		rs = stringBuilder(errType, ":", strconv.Itoa(result.(int)))
-	case error:
-		rs = stringBuilder(errType, ":", result.(error).Error())
-	default:
-		rs = errType
+	for _, result := range items {
+		switch result.(type) {
+		case string:
+			errType = stringBuilder(errType, result.(string))
+		case int:
+			errType = stringBuilder(errType, strconv.Itoa(result.(int)))
+		case error:
+			errType = stringBuilder(errType, result.(error).Error())
+		}
 	}
 
-	return errors.New(rs)
+	return errors.New(errType)
 }
