@@ -38,7 +38,7 @@ func TestRobotSendMessageFailed_WebhookReturnEmpty(t *testing.T) {
 
 	robot := getTestRobot(ts.URL)
 	err := robot.SendMarkdownMessage("title", "text")
-	assert.Equal(t, "HttpResponseBodyDecodeFailed: EOF", err.Error())
+	assert.Equal(t, "HttpResponseBodyDecodeFailed:EOF", err.Error())
 }
 
 func TestRobotSendMessageFailed_ResponseUnsuccessfully(t *testing.T) {
@@ -48,35 +48,35 @@ func TestRobotSendMessageFailed_ResponseUnsuccessfully(t *testing.T) {
 
 	robot := getTestRobot(ts.URL)
 	err := robot.SendMarkdownMessage("title", "text")
-	assert.Equal(t, "HttpResponseStatusCode: 400", err.Error())
+	assert.Equal(t, "HttpResponseStatusCode:400", err.Error())
 }
 
 // 钉钉机器人发送文本消息
 func TestDingTalkRobot_SendTextMessage(t *testing.T) {
 	robot, _ := New("dingtalk", "token")
 	err := robot.SendTextMessage("test")
-	assert.Contains(t, "SendMessageFailed: token is not exist", err.Error())
+	assert.Contains(t, "SendMessageFailed:token is not exist", err.Error())
 }
 
 // 钉钉机器人发送 Markdown 消息
 func TestDingTalkRobot_SendMarkdownMessage(t *testing.T) {
 	robot, _ := New("dingtalk", "token")
 	err := robot.SendMarkdownMessage("title", "text")
-	assert.Contains(t, "SendMessageFailed: token is not exist", err.Error())
+	assert.Contains(t, "SendMessageFailed:token is not exist", err.Error())
 }
 
 // 企业微信机器人发送文本消息
 func TestWechatWorkRobot_SendTextMessage(t *testing.T) {
 	robot, _ := New("wechatwork", "token")
 	err := robot.SendTextMessage("test")
-	assert.Contains(t, err.Error(), "SendMessageFailed: invalid webhook url")
+	assert.Contains(t, err.Error(), "SendMessageFailed:invalid webhook url")
 }
 
 // 企业微信机器人发送 Markdown 消息
 func TestWechatWorkRobot_SendMarkdownMessage(t *testing.T) {
 	robot, _ := New("wechatwork", "token")
 	err := robot.SendMarkdownMessage("title", "text")
-	assert.Contains(t, err.Error(), "SendMessageFailed: invalid webhook url")
+	assert.Contains(t, err.Error(), "SendMessageFailed:invalid webhook url")
 }
 
 // mock http client
@@ -97,7 +97,7 @@ func testHttp(t *testing.T, want string, resp string, statusCode int) *httptest.
 
 func getTestRobot(api string) *Robot {
 	return &Robot{
-		Webhook:              api + "/send?token=token",
+		Webhook:              stringBuilder(api, "/send?token=token"),
 		ParseTextMessage:     testTestBodyFunc,
 		ParseMarkdownMessage: testMarkdownParser,
 	}

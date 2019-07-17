@@ -15,7 +15,7 @@ type WechatWorkMarkdownMessage struct {
 // @see https://work.weixin.qq.com/api/doc#90000/90136/91770
 func newWechatWorkRobot(token string) *Robot {
 	return &Robot{
-		Webhook:              "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + token,
+		Webhook:              stringBuilder("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=", token),
 		ParseTextMessage:     parseDingTalkTextMessage,
 		ParseMarkdownMessage: parseWechatWorkMarkdownMessage,
 	}

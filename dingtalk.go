@@ -15,7 +15,7 @@ type DingTalkMarkdownMessage struct {
 // @see https://open-doc.dingtalk.com/microapp/serverapi2/qf2nxq
 func newDingTalkRobot(token string) *Robot {
 	return &Robot{
-		Webhook:              "https://oapi.dingtalk.com/robot/send?access_token=" + token,
+		Webhook:              stringBuilder("https://oapi.dingtalk.com/robot/send?access_token=", token),
 		ParseTextMessage:     parseDingTalkTextMessage,
 		ParseMarkdownMessage: parseDingTalkMarkdownMessage,
 	}

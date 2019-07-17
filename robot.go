@@ -3,9 +3,7 @@ package grobot
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
-	"strconv"
 )
 
 // Robot 消息机器人结构体, 消息处理都由 Robot 完成
@@ -54,7 +52,7 @@ func (robot Robot) send(body map[string]interface{}) error {
 	resp, respErr := client.Do(req)
 
 	if respErr != nil {
-		return errors.New("HttpResponseFailed: " + respErr.Error())
+		return newError("HttpResponseFailed", respErr)
 	}
 
 	if resp != nil {
@@ -62,18 +60,18 @@ func (robot Robot) send(body map[string]interface{}) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("HttpResponseStatusCode: " + strconv.Itoa(resp.StatusCode))
+		return newError("HttpResponseStatusCode", resp.StatusCode)
 	}
 
 	jsonResp := WebhookResponse{}
 	decodeErr := json.NewDecoder(resp.Body).Decode(&jsonResp)
 
 	if decodeErr != nil {
-		return errors.New("HttpResponseBodyDecodeFailed: " + decodeErr.Error())
+		return newError("HttpResponseBodyDecodeFailed", decodeErr)
 	}
 
 	if jsonResp.ErrMsg != "ok" {
-		return errors.New("SendMessageFailed: " + jsonResp.ErrMsg)
+		return newError("SendMessageFailed", jsonResp.ErrMsg)
 	}
 
 	return nil
