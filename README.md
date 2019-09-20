@@ -6,27 +6,45 @@
 
 支持钉钉和企业微信的消息机器人
 
+## Installation
+
+```
+go get github.com/braumye/grobot
+```
+
 ## DingTalk Example
 
 ```golang
-robot, err := grobot.New("dingtalk", "your_dingtalk_access_token")
+package main
 
-// 发送文本消息
-err = robot.SendTextMessage("test message")
+import "github.com/braumye/grobot"
 
-// 发送 Markdown 消息
-err = robot.SendMarkdownMessage("markdown title", "# Markdown Text")
+func main() {
+	robot, err := grobot.New("dingtalk", "your_dingtalk_access_token")
+
+	// 发送文本消息
+	err = robot.SendTextMessage("test message")
+
+	// 发送 Markdown 消息
+	err = robot.SendMarkdownMessage("markdown title", "# Markdown Text")
+}
 ```
 
 ## Wechat Work Example
 
 ```golang
-robot, err := grobot.New("wechatwork", "your_wechat_work_key")
+package main
 
-// 发送文本消息
-err = robot.SendTextMessage("test message")
+import "github.com/braumye/grobot"
 
-// 发送 Markdown 消息
-err = robot.SendMarkdownMessage("markdown title", "# Markdown Text")
+func main() {
+	robot, err := grobot.New("wechatwork", "your_wechat_work_key")
+
+	// 发送文本消息
+	err = robot.SendTextMessage("test message")
+
+	// 发送 Markdown 消息
+	err = robot.SendMarkdownMessage("markdown title", "# Markdown Text")
+}
 ```
 
